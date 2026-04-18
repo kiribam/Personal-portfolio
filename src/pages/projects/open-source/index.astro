@@ -1,18 +1,25 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProjectList from '../../../components/ProjectList.astro';
+import { getProjectsByCategory } from '../../../data/projects';
 
 const title = 'Open source · Projects';
 const description =
-	'Open source libraries and contributions—placeholder for your portfolio.';
+	'Open source libraries and contributions from the portfolio.';
+const items = getProjectsByCategory('open-source');
 ---
 
 <BaseLayout {title} {description}>
 	<section class="prose">
 		<h1>Open source</h1>
 		<p>
-			Highlight repositories you maintain or meaningfully contribute to. Mention stars, adoption,
-			or notable issues you helped close.
+			Libraries you maintain and meaningful upstream contributions. Point repository links at the
+			canonical repo and mention adoption where it helps tell the story.
 		</p>
 		<p><a href="/projects/">← Back to projects overview</a></p>
+	</section>
+	<section class="section-block" aria-labelledby="oss-list-heading">
+		<h2 id="oss-list-heading" class="section-heading">In this category</h2>
+		<ProjectList projects={items} />
 	</section>
 </BaseLayout>

@@ -1,18 +1,25 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProjectList from '../../../components/ProjectList.astro';
+import { getProjectsByCategory } from '../../../data/projects';
 
 const title = 'Data & ML · Projects';
 const description =
-	'Data pipelines, analytics, and machine learning work—placeholder for your portfolio.';
+	'Data pipelines, analytics, and machine learning work from the portfolio.';
+const items = getProjectsByCategory('data');
 ---
 
 <BaseLayout {title} {description}>
 	<section class="prose">
 		<h1>Data &amp; ML</h1>
 		<p>
-			Use this page for notebooks, ETL jobs, models in production, or data visualizations. Pair each
-			project with metrics that matter (latency, accuracy, business impact).
+			ETL, experimentation, and models in production. When you add real work, include metrics that
+			matter—latency, precision/recall, or business impact.
 		</p>
 		<p><a href="/projects/">← Back to projects overview</a></p>
+	</section>
+	<section class="section-block" aria-labelledby="data-list-heading">
+		<h2 id="data-list-heading" class="section-heading">In this category</h2>
+		<ProjectList projects={items} />
 	</section>
 </BaseLayout>

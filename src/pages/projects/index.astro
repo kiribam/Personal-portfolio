@@ -1,28 +1,40 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectList from '../../components/ProjectList.astro';
 import { projectCategories } from '../../data/projectsNav';
+import { getAllProjectsSorted } from '../../data/projects';
 
 const title = 'Projects · Portfolio';
 const description =
 	'Browse project categories: web applications, data and machine learning, and open source contributions.';
+const allProjects = getAllProjectsSorted();
 ---
 
 <BaseLayout {title} {description}>
 	<section class="prose">
 		<h1>Projects</h1>
 		<p>
-			Welcome to the projects hub. Each category has its own page—add case studies, repos, and demos
-			as you ship work.
+			Everything below is driven from <code>src/data/projects.ts</code>. Use categories for longer
+			write-ups; the list here is the single source of truth across the site.
 		</p>
 	</section>
-	<div class="card-grid" role="list">
-		{
-			projectCategories.map((c) => (
-				<a class="card" href={c.href} role="listitem">
-					<h3>{c.label}</h3>
-					<p>Open category</p>
-				</a>
-			))
-		}
-	</div>
+
+	<section class="section-block" aria-labelledby="categories-heading">
+		<h2 id="categories-heading" class="section-heading">Categories</h2>
+		<div class="card-grid" role="list">
+			{
+				projectCategories.map((c) => (
+					<a class="card" href={c.href} role="listitem">
+						<h3>{c.label}</h3>
+						<p>View projects in this category</p>
+					</a>
+				))
+			}
+		</div>
+	</section>
+
+	<section class="section-block" aria-labelledby="all-heading">
+		<h2 id="all-heading" class="section-heading">All projects</h2>
+		<ProjectList projects={allProjects} />
+	</section>
 </BaseLayout>

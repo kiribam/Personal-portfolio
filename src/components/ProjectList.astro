@@ -1,0 +1,51 @@
+---
+import type { Project } from '../data/projects';
+
+interface Props {
+	projects: Project[];
+	emptyMessage?: string;
+}
+
+const { projects: items, emptyMessage = 'Nothing listed here yet—add entries in src/data/projects.ts.' } = Astro.props;
+---
+
+{
+	items.length === 0 ? (
+		<p class="empty-projects">{emptyMessage}</p>
+	) : (
+		<ul class="project-list">
+			{items.map((p) => (
+				<li>
+					<article class="project-item" aria-labelledby={`project-${p.id}-title`}>
+						<h3 class="project-item-title" id={`project-${p.id}-title`}>
+							{p.title}
+						</h3>
+						<p class="project-item-summary">{p.summary}</p>
+						{p.tags && p.tags.length > 0 ? (
+							<ul class="tag-list" aria-label="Technologies">
+								{p.tags.map((t) => (
+									<li>{t}</li>
+								))}
+							</ul>
+						) : null}
+						{(p.links?.repo || p.links?.demo) && (
+							<p class="project-item-links">
+								{p.links.demo && (
+									<a href={p.links.demo} rel="noopener noreferrer" target="_blank">
+										Live demo
+									</a>
+								)}
+								{p.links.demo && p.links.repo && <span class="link-sep">·</span>}
+								{p.links.repo && (
+									<a href={p.links.repo} rel="noopener noreferrer" target="_blank">
+										Repository
+									</a>
+								)}
+							</p>
+						)}
+					</article>
+				</li>
+			))}
+		</ul>
+	)
+}

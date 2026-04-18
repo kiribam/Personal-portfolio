@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = 'Home · Portfolio';
+const description =
+	'Personal portfolio: projects, background, and selected work by Kiri Bamrungpong.';
+---
+
+<BaseLayout {title} {description}>
+	<section class="prose">
+		<h1>Hello, I am Kiri.</h1>
+		<p>
+			This site is a living portfolio: a place to showcase projects, experiments, and things I build
+			over time. Use the navigation above to explore work by category or learn more about me.
+		</p>
+		<p>
+			<a href="/projects/">View projects</a>
+			·
+			<a href="/about/">About me</a>
+		</p>
+	</section>
+</BaseLayout>

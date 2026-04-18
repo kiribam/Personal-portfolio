@@ -1,0 +1,70 @@
+---
+import { projectCategories } from '../data/projectsNav';
+
+const rawPath = Astro.url.pathname;
+const pathname = rawPath.replace(/\/$/, '') || '/';
+
+function pathEquals(a: string, b: string): boolean {
+	const x = a.replace(/\/$/, '') || '/';
+	const y = b.replace(/\/$/, '') || '/';
+	return x === y;
+}
+---
+
+<header class="site-header">
+	<div class="nav-inner">
+		<a class="brand" href="/">Kiri Bamrungpong</a>
+		<nav aria-label="Primary">
+			<ul class="nav-list">
+				<li class="nav-item">
+					<a class="nav-link" href="/" aria-current={pathname === '/' ? 'page' : undefined}
+						>Home</a
+					>
+				</li>
+				<li class="nav-item">
+					<details class="projects-mega">
+						<summary class="projects-trigger">
+							<span>Projects</span>
+							<span class="chevron" aria-hidden="true"></span>
+						</summary>
+						<div class="projects-panel" role="group" aria-label="Project categories">
+							<a
+								href="/projects/"
+								aria-current={pathname === '/projects' ? 'page' : undefined}
+								>Projects overview</a
+							>
+							{
+								projectCategories.map((c) => (
+									<a href={c.href} aria-current={pathEquals(pathname, c.href) ? 'page' : undefined}>
+										{c.label}
+									</a>
+								))
+							}
+						</div>
+					</details>
+				</li>
+				<li class="nav-item">
+					<a
+						class="nav-link"
+						href="/about/"
+						aria-current={pathname === '/about' ? 'page' : undefined}>About me</a
+					>
+				</li>
+			</ul>
+		</nav>
+	</div>
+</header>
+
+<script>
+	/* Close Projects <details> on Escape for keyboard users */
+	const details = document.querySelector('.projects-mega');
+	if (details instanceof HTMLDetailsElement) {
+		details.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') {
+				details.open = false;
+				const summary = details.querySelector('summary');
+				summary?.focus();
+			}
+		});
+	}
+</script>

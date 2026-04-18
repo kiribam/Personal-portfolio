@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = 'Page not found · Portfolio';
+const description = 'The page you requested does not exist.';
+---
+
+<BaseLayout {title} {description}>
+	<section class="prose">
+		<h1>404</h1>
+		<p>That page is missing. Try the <a href="/">home page</a> or <a href="/projects/">projects</a>.</p>
+	</section>
+</BaseLayout>

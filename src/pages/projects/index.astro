@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { projectCategories } from '../../data/projectsNav';
+
+const title = 'Projects · Portfolio';
+const description =
+	'Browse project categories: web applications, data and machine learning, and open source contributions.';
+---
+
+<BaseLayout {title} {description}>
+	<section class="prose">
+		<h1>Projects</h1>
+		<p>
+			Welcome to the projects hub. Each category has its own page—add case studies, repos, and demos
+			as you ship work.
+		</p>
+	</section>
+	<div class="card-grid" role="list">
+		{
+			projectCategories.map((c) => (
+				<a class="card" href={c.href} role="listitem">
+					<h3>{c.label}</h3>
+					<p>Open category</p>
+				</a>
+			))
+		}
+	</div>
+</BaseLayout>

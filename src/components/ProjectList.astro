@@ -18,7 +18,9 @@ const { projects: items, emptyMessage = 'Nothing listed here yet—add entries i
 				<li>
 					<article class="project-item" aria-labelledby={`project-${p.id}-title`}>
 						<h3 class="project-item-title" id={`project-${p.id}-title`}>
-							{p.title}
+							<a class="project-item-title-link" href={`/projects/detail/${p.id}/`}>
+								{p.title}
+							</a>
 						</h3>
 						<p class="project-item-summary">{p.summary}</p>
 						{p.tags && p.tags.length > 0 ? (
@@ -43,6 +45,9 @@ const { projects: items, emptyMessage = 'Nothing listed here yet—add entries i
 								)}
 							</p>
 						)}
+						<p class="project-item-more">
+							<a href={`/projects/detail/${p.id}/`}>Case study</a>
+						</p>
 					</article>
 				</li>
 			))}

@@ -1,6 +1,6 @@
 # Personal portfolio
 
-Static personal portfolio built with [Astro](https://astro.build/). Pages: **Home**, **Projects** (overview plus category subpages), and **About me**. Global navigation appears on every page.
+Static personal portfolio built with [Astro](https://astro.build/). Pages: **Home**, **Projects** (overview, category subpages, and per-project **case study** pages at `/projects/detail/<id>/`), and **About me**. Global navigation appears on every page. Project entries live in `src/data/projects.ts`.
 
 ## Local development
 

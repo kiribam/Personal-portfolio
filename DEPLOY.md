@@ -49,9 +49,30 @@ Official guide: [Set up a global external Application Load Balancer with Cloud S
 
 Optional: enable [Cloud CDN](https://cloud.google.com/cdn/docs) on the backend bucket for caching and lower latency.
 
-## 4. CI deploy (optional)
+## 4. GitHub Actions deploy (optional)
 
-Use **Workload Identity Federation** to let GitHub Actions authenticate to GCP without long-lived JSON keys, then run `gcloud storage rsync` (or `gsutil`) on pushes to `main`. Do not commit service account keys to the repository.
+The workflow [`.github/workflows/deploy-gcs.yml`](.github/workflows/deploy-gcs.yml) builds on every push to `main` **only when** you configure repository **Variables** (Settings → Secrets and variables → Actions → Variables):
+
+| Variable | Example | Purpose |
+|----------|---------|---------|
+| `GCP_BUCKET` | `my-portfolio-prod` | Bucket name (no `gs://` prefix) |
+| `GCP_PROJECT_ID` | `my-gcp-project` | Project for `gcloud` |
+| `PUBLIC_SITE_URL` | `https://www.example.com` | Passed to `npm run build` for canonical / Open Graph |
+
+Until `GCP_BUCKET` and `GCP_PROJECT_ID` are set, the deploy job is **skipped** so forks and local clones are unaffected.
+
+Configure these **Secrets** for authentication (prefer **Workload Identity Federation** over JSON keys):
+
+| Secret | Purpose |
+|--------|---------|
+| `GCP_WORKLOAD_IDENTITY_PROVIDER` | Full WIF provider resource name |
+| `GCP_SERVICE_ACCOUNT_EMAIL` | Deployer service account (needs permission to write objects in the bucket, e.g. `roles/storage.objectAdmin` scoped to the bucket) |
+
+Setup guide: [google-github-actions/auth — Workload Identity Federation](https://github.com/google-github-actions/auth#setting-up-workload-identity-federation).
+
+The workflow runs `gcloud storage rsync -r --delete-unmatched-destination-objects dist/ gs://$GCP_BUCKET/`, mirroring the manual sync in section 1. You can also trigger it from the Actions tab (**Run workflow**).
+
+Do not commit service account JSON keys to the repository.
 
 ## References
 

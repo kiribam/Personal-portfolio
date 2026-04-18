@@ -1,0 +1,64 @@
+# Deploy static dist/ to a Google Cloud Storage bucket.
+# Runs only when repository variable GCP_BUCKET is set (non-empty).
+#
+# Required repository variables (Settings → Secrets and variables → Actions → Variables):
+#   GCP_BUCKET          — bucket name only, e.g. my-site-prod
+#   GCP_PROJECT_ID      — GCP project id
+#   PUBLIC_SITE_URL     — https://your.domain (no trailing slash) for Astro build
+#
+# Required secrets (Workload Identity Federation — recommended):
+#   GCP_WORKLOAD_IDENTITY_PROVIDER  — full provider resource name
+#   GCP_SERVICE_ACCOUNT_EMAIL       — deployer SA email (needs storage.objectAdmin on bucket)
+#
+# Docs: https://github.com/google-github-actions/auth#setting-up-workload-identity-federation
+
+name: Deploy to GCS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-gcs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and sync to GCS
+    if: ${{ vars.GCP_BUCKET != '' && vars.GCP_PROJECT_ID != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        env:
+          PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL || 'https://example.com' }}
+        run: npm run build
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Sync to bucket
+        run: gcloud storage rsync -r --delete-unmatched-destination-objects dist/ "gs://${{ vars.GCP_BUCKET }}/"

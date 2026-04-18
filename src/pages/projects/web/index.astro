@@ -1,18 +1,25 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProjectList from '../../../components/ProjectList.astro';
+import { getProjectsByCategory } from '../../../data/projects';
 
 const title = 'Web apps · Projects';
 const description =
-	'Web applications and front-end work—placeholder content for your portfolio.';
+	'Web applications and front-end work—projects and case studies from the portfolio.';
+const items = getProjectsByCategory('web');
 ---
 
 <BaseLayout {title} {description}>
 	<section class="prose">
 		<h1>Web apps</h1>
 		<p>
-			Describe SPAs, dashboards, or full-stack apps here. For each entry, consider: problem, stack,
-			your role, outcome, and a link to the live site or repo.
+			SPAs, dashboards, marketing sites, and full-stack apps. For each real entry, expand the summary
+			in <code>projects.ts</code> or add a dedicated case-study page later.
 		</p>
 		<p><a href="/projects/">← Back to projects overview</a></p>
+	</section>
+	<section class="section-block" aria-labelledby="web-list-heading">
+		<h2 id="web-list-heading" class="section-heading">In this category</h2>
+		<ProjectList projects={items} />
 	</section>
 </BaseLayout>

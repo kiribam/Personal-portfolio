@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { projects } from '../../../data/projects';
+import { projectCategories } from '../../../data/projectsNav';
+
+export function getStaticPaths() {
+	return projects.map((project) => ({
+		params: { id: project.id },
+		props: { project },
+	}));
+}
+
+const { project } = Astro.props;
+
+const categoryLabel =
+	projectCategories.find((c) => c.slug === project.category)?.label ?? project.category;
+
+const title = `${project.title} · Projects`;
+const description = project.summary;
+const ogImage = project.coverImage ?? '/og-default.svg';
+---
+
+<BaseLayout {title} {description} {ogImage}>
+	<article class="prose project-detail">
+		<p class="back-link">
+			<a href="/projects/">← All projects</a>
+			<span class="link-sep">·</span>
+			<a href={`/projects/${project.category}/`}>{categoryLabel}</a>
+		</p>
+
+		<h1>{project.title}</h1>
+		<p class="project-lede">{project.summary}</p>
+
+		{
+			project.tags && project.tags.length > 0 && (
+				<ul class="tag-list tag-list-inline" aria-label="Technologies">
+					{project.tags.map((t) => (
+						<li>{t}</li>
+					))}
+				</ul>
+			)
+		}
+
+		{
+			(project.links?.repo || project.links?.demo) && (
+				<p class="project-item-links">
+					{project.links.demo && (
+						<a href={project.links.demo} rel="noopener noreferrer" target="_blank">
+							Live demo
+						</a>
+					)}
+					{project.links.demo && project.links.repo && <span class="link-sep">·</span>}
+					{project.links.repo && (
+						<a href={project.links.repo} rel="noopener noreferrer" target="_blank">
+							Repository
+						</a>
+					)}
+				</p>
+			)
+		}
+
+		{
+			project.coverImage && (
+				<p class="project-cover">
+					<img src={project.coverImage} alt="" width="800" height="420" loading="lazy" decoding="async" />
+				</p>
+			)
+		}
+
+		{
+			project.detailParagraphs?.map((para) => (
+				<p>{para}</p>
+			))
+		}
+	</article>
+</BaseLayout>

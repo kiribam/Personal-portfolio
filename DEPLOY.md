@@ -51,28 +51,49 @@ Optional: enable [Cloud CDN](https://cloud.google.com/cdn/docs) on the backend b
 
 ## 4. GitHub Actions deploy (optional)
 
-The workflow [`.github/workflows/deploy-gcs.yml`](.github/workflows/deploy-gcs.yml) builds on every push to `main` **only when** you configure repository **Variables** (Settings → Secrets and variables → Actions → Variables):
+The workflow [`.github/workflows/deploy-gcs.yml`](.github/workflows/deploy-gcs.yml) builds on every push to `main` when the right configuration is present. It uses **two different places** in GitHub: **Variables** (non-secret) and **Secrets** (encrypted). The workflow file reads them by **exact name**—typo in the name means the step will fail or be skipped.
 
-| Variable | Example | Purpose |
-|----------|---------|---------|
-| `GCP_BUCKET` | `my-portfolio-prod` | Bucket name (no `gs://` prefix) |
-| `GCP_PROJECT_ID` | `my-gcp-project` | Project for `gcloud` |
-| `PUBLIC_SITE_URL` | `https://www.example.com` | Passed to `npm run build` for canonical / Open Graph |
+### 4a. Repository variables (not secret)
 
-Until `GCP_BUCKET` and `GCP_PROJECT_ID` are set, the deploy job is **skipped** so forks and local clones are unaffected.
+In GitHub: **Settings → Secrets and variables → Actions → Variables** (open the **Variables** tab, not Secrets).
 
-Configure these **Secrets** for authentication (prefer **Workload Identity Federation** over JSON keys):
+Click **New repository variable** and create each row:
 
-| Secret | Purpose |
-|--------|---------|
-| `GCP_WORKLOAD_IDENTITY_PROVIDER` | Full WIF provider resource name |
-| `GCP_SERVICE_ACCOUNT_EMAIL` | Deployer service account (needs permission to write objects in the bucket, e.g. `roles/storage.objectAdmin` scoped to the bucket) |
+- **`GCP_BUCKET`** — value is only the bucket name, e.g. `my-portfolio-prod` (no `gs://`).
+- **`GCP_PROJECT_ID`** — your GCP project ID, e.g. `my-gcp-project`.
+- **`PUBLIC_SITE_URL`** (optional but recommended) — your public site URL with scheme, e.g. `https://www.example.com` (no trailing slash). If you omit it, the workflow falls back to `https://example.com` for the build.
 
-Setup guide: [google-github-actions/auth — Workload Identity Federation](https://github.com/google-github-actions/auth#setting-up-workload-identity-federation).
+Until **`GCP_BUCKET`** and **`GCP_PROJECT_ID`** are both set, the deploy job is **skipped** so forks and local clones are unaffected.
 
-The workflow runs `gcloud storage rsync -r --delete-unmatched-destination-objects dist/ gs://$GCP_BUCKET/`, mirroring the manual sync in section 1. You can also trigger it from the Actions tab (**Run workflow**).
+### 4b. Repository secrets (encrypted — this is what people often miss)
+
+In GitHub: **Settings → Secrets and variables → Actions → Secrets** (open the **Secrets** tab).
+
+Click **New repository secret** and create each row. The **name** must match character-for-character:
+
+- **`GCP_WORKLOAD_IDENTITY_PROVIDER`** — paste the full Workload Identity Federation **provider resource name** (one long string from Google Cloud / `gcloud`, usually starting with `projects/`).
+- **`GCP_SERVICE_ACCOUNT_EMAIL`** — paste the deployer **service account email**, e.g. `github-deploy@my-gcp-project.iam.gserviceaccount.com`. That account needs permission to write objects to the bucket (for example `roles/storage.objectAdmin` on that bucket).
+
+These two entries are **secrets**, not variables, because they identify your cloud trust configuration. Do **not** put them in `Variables`; the Actions UI keeps Secrets masked in logs.
+
+Optional reading: [google-github-actions/auth — Workload Identity Federation](https://github.com/google-github-actions/auth#setting-up-workload-identity-federation).
+
+The workflow then runs `gcloud storage rsync -r --delete-unmatched-destination-objects dist/ gs://$GCP_BUCKET/`, same idea as section 1. You can also run the workflow manually from the **Actions** tab (**Deploy to GCS → Run workflow**).
 
 Do not commit service account JSON keys to the repository.
+
+### 4c. Run the same deploy steps on your Mac
+
+From the repo root (requires `gcloud` installed and a shell where you are already authenticated to GCP, e.g. `gcloud auth login` and `gcloud config set project YOUR_PROJECT_ID`):
+
+```bash
+chmod +x scripts/deploy-gcs-local.sh
+export PUBLIC_SITE_URL=https://www.yourdomain.com
+export GCP_BUCKET=your-bucket-name
+./scripts/deploy-gcs-local.sh
+```
+
+That script runs `npm ci`, `npm run build`, then `gcloud storage rsync` to `gs://$GCP_BUCKET/`. If you omit `GCP_BUCKET`, the script exits with a short error telling you to set it.
 
 ## References
 
